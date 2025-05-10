@@ -3,12 +3,19 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import UserLayout from '../components/UserLayout';
-import FamilyTreeGraph from '../components/FamilyTreeGraph';
+import FamilyTreeBalkan from '../components/FamilyTreeBalkan';
 import { FamilyTreeService } from '../services/family-tree.service';
 
 export default function FamilyTree() {
   const [selectedPersonId, setSelectedPersonId] = useState<number | undefined>(undefined);
-  const [selectedPerson, setSelectedPerson] = useState<any>(null);
+  const [selectedPerson, setSelectedPerson] = useState<{
+    id: number;
+    firstName: string;
+    lastName: string;
+    gender: string;
+    birthDate?: string;
+    imageUrl?: string;
+  } | null>(null);
   const [showDetails, setShowDetails] = useState(false);
 
   // Gérer la sélection d'une personne dans le graphe
@@ -61,12 +68,12 @@ export default function FamilyTree() {
       <div className="bg-white rounded-lg shadow-md p-6 mb-8">
         <div className="mb-4">
           <p className="text-gray-600">
-            Cliquez sur un membre pour voir ses détails. Utilisez les contrôles pour naviguer dans l'arbre.
+            Cliquez sur un membre pour voir ses détails. Utilisez les contrôles pour naviguer dans l&apos;arbre.
           </p>
         </div>
         
-        {/* Zone de rendu de l'arbre généalogique avec React Flow */}
-        <FamilyTreeGraph 
+        {/* Zone de rendu de l'arbre généalogique avec BALKAN FamilyTree */}
+        <FamilyTreeBalkan 
           selectedPersonId={selectedPersonId} 
           onPersonSelect={handlePersonSelect} 
           useSimulatedData={true} 
@@ -97,7 +104,7 @@ export default function FamilyTree() {
               
               <div>
                 <p className="text-sm text-gray-500">Date de naissance</p>
-                <p>{selectedPerson.birthDate || 'Non renseignée'}</p>
+                <p>{selectedPerson.birthDate || "Non renseignée"}</p>
               </div>
               
               <div className="flex space-x-2 pt-4">
@@ -194,6 +201,8 @@ export default function FamilyTree() {
 }
 
 // Données d'exemple pour simuler un arbre généalogique
+// Utilisées par le service FamilyTreeService.getSimulatedFamilyData()
+/* 
 const sampleFamilyData = {
   persons: [
     { id: 1, firstName: 'Jean', lastName: 'Dupont', gender: 'male', birthDate: '1950-05-15', x: 300, y: 50 },
@@ -218,3 +227,4 @@ const sampleFamilyData = {
     { source: 6, target: 8, type: 'parent-child' },
   ]
 };
+*/

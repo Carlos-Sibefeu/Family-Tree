@@ -4,9 +4,11 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { AuthService } from '../../services/auth.service';
+import LogoutModal from '../LogoutModal';
 
 export default function UserSidebar() {
   const [isOpen, setIsOpen] = useState(false);
+  const [showLogoutModal, setShowLogoutModal] = useState(false);
   const pathname = usePathname();
   const router = useRouter();
 
@@ -51,9 +53,18 @@ export default function UserSidebar() {
     }
   };
 
-  const handleLogout = () => {
+  const handleLogoutClick = () => {
+    setShowLogoutModal(true);
+  };
+
+  const handleConfirmLogout = () => {
     AuthService.logout();
     router.push('/login');
+    setShowLogoutModal(false);
+  };
+
+  const handleCancelLogout = () => {
+    setShowLogoutModal(false);
   };
 
   return (
@@ -176,7 +187,7 @@ export default function UserSidebar() {
         
         <div className="absolute bottom-0 left-0 right-0 p-6 border-t border-teal-700/20">
           <button
-            onClick={handleLogout}
+            onClick={handleLogoutClick}
             className="flex items-center w-full px-4 py-3 rounded-lg hover:bg-slate-600/30 transition-all duration-300 text-left group"
           >
             <svg className="h-5 w-5 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -186,6 +197,12 @@ export default function UserSidebar() {
           </button>
         </div>
       </div>
+      {/* Modal de déconnexion */}
+      <LogoutModal 
+        isOpen={showLogoutModal} 
+        onClose={handleCancelLogout} 
+        onConfirm={handleConfirmLogout} 
+      />
     </>
   );
 }

@@ -2,11 +2,15 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
+import { AuthService } from '../../services/auth.service';
+import LogoutModal from '../LogoutModal';
 
 export default function AdminSidebar() {
   const [isOpen, setIsOpen] = useState(false);
+  const [showLogoutModal, setShowLogoutModal] = useState(false);
   const pathname = usePathname();
+  const router = useRouter();
 
   const isActive = (path: string) => {
     // Si le chemin est exactement le même, c'est actif
@@ -49,7 +53,7 @@ export default function AdminSidebar() {
       <div className="md:hidden fixed top-4 left-4 z-50">
         <button
           onClick={() => setIsOpen(!isOpen)}
-          className="bg-blue-700 text-white p-2 rounded-md shadow-md"
+          className="bg-teal-700 text-white p-2 rounded-lg shadow-lg hover:bg-teal-800 transition-all duration-300"
         >
           <svg
             className="h-6 w-6"
@@ -78,19 +82,19 @@ export default function AdminSidebar() {
 
       {/* Sidebar */}
       <div
-        className={`fixed top-0 left-0 h-full bg-blue-700 text-white w-64 shadow-lg transform transition-transform duration-300 ease-in-out z-40 ${
+        className={`fixed top-0 left-0 h-full bg-gradient-to-b from-teal-800 to-slate-800 text-white w-64 shadow-xl transform transition-transform duration-300 ease-in-out z-40 ${
           isOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'
         }`}
       >
         <div className="p-6">
-          <h1 className="text-2xl font-bold mb-8">Admin Panel</h1>
-          <div className="h-1 w-12 bg-white mb-6"></div>
+          <h1 className="text-2xl font-bold mb-8 text-transparent bg-clip-text bg-gradient-to-r from-white to-teal-200">Admin Panel</h1>
+          <div className="h-1 w-20 bg-gradient-to-r from-teal-400 to-slate-300 rounded-full mb-8 opacity-80"></div>
           
           <nav className="space-y-1">
             <Link
               href="/admin/dashboard"
               className={`flex items-center px-4 py-2 rounded-md transition-colors ${
-                isActive('/admin/dashboard') ? 'bg-blue-800' : 'hover:bg-blue-800'
+                isActive('/admin/dashboard') ? 'bg-teal-700/30 shadow-md backdrop-blur-sm' : 'hover:bg-teal-700/20 hover:translate-x-1'
               }`}
             >
               <svg className="h-5 w-5 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -102,7 +106,7 @@ export default function AdminSidebar() {
             <Link
               href="/admin/membership-requests"
               className={`flex items-center px-4 py-2 rounded-md transition-colors ${
-                isActive('/admin/membership-requests') ? 'bg-blue-800' : 'hover:bg-blue-800'
+                isActive('/admin/membership-requests') ? 'bg-teal-700/30 shadow-md backdrop-blur-sm' : 'hover:bg-teal-700/20 hover:translate-x-1'
               }`}
             >
               <svg className="h-5 w-5 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -114,7 +118,7 @@ export default function AdminSidebar() {
             <Link
               href="/admin/users"
               className={`flex items-center px-4 py-2 rounded-md transition-colors ${
-                isActive('/admin/users') ? 'bg-blue-800' : 'hover:bg-blue-800'
+                isActive('/admin/users') ? 'bg-teal-700/30 shadow-md backdrop-blur-sm' : 'hover:bg-teal-700/20 hover:translate-x-1'
               }`}
             >
               <svg className="h-5 w-5 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -126,7 +130,7 @@ export default function AdminSidebar() {
             <Link
               href="/admin/family-tree"
               className={`flex items-center px-4 py-2 rounded-md transition-colors ${
-                isActive('/admin/family-tree') ? 'bg-blue-800' : 'hover:bg-blue-800'
+                isActive('/admin/family-tree') ? 'bg-teal-700/30 shadow-md backdrop-blur-sm' : 'hover:bg-teal-700/20 hover:translate-x-1'
               }`}
             >
               <svg className="h-5 w-5 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -138,7 +142,7 @@ export default function AdminSidebar() {
             <Link
               href="/admin/settings"
               className={`flex items-center px-4 py-2 rounded-md transition-colors ${
-                isActive('/admin/settings') ? 'bg-blue-800' : 'hover:bg-blue-800'
+                isActive('/admin/settings') ? 'bg-teal-700/30 shadow-md backdrop-blur-sm' : 'hover:bg-teal-700/20 hover:translate-x-1'
               }`}
             >
               <svg className="h-5 w-5 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -150,10 +154,10 @@ export default function AdminSidebar() {
           </nav>
         </div>
         
-        <div className="absolute bottom-0 left-0 right-0 p-6 border-t border-blue-600">
+        <div className="absolute bottom-0 left-0 right-0 p-6 border-t border-teal-700/20">
           <Link
             href="/dashboard"
-            className="flex items-center px-4 py-2 rounded-md hover:bg-blue-800 transition-colors"
+            className="flex items-center px-4 py-3 rounded-lg hover:bg-slate-600/30 transition-all duration-300 text-left group"
           >
             <svg className="h-5 w-5 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7l4-4m0 0l4 4m-4-4v18" />
@@ -161,17 +165,27 @@ export default function AdminSidebar() {
             Quitter l'admin
           </Link>
           
-          <Link
-            href="/logout"
-            className="flex items-center px-4 py-2 rounded-md hover:bg-blue-800 transition-colors mt-2"
+          <button
+            onClick={() => setShowLogoutModal(true)}
+            className="flex items-center w-full px-4 py-3 rounded-lg hover:bg-slate-600/30 transition-all duration-300 text-left group mt-2"
           >
             <svg className="h-5 w-5 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
             </svg>
             Déconnexion
-          </Link>
+          </button>
         </div>
       </div>
+      {/* Modal de déconnexion */}
+      <LogoutModal 
+        isOpen={showLogoutModal} 
+        onClose={() => setShowLogoutModal(false)} 
+        onConfirm={() => {
+          AuthService.logout();
+          router.push('/login');
+          setShowLogoutModal(false);
+        }} 
+      />
     </>
   );
 }

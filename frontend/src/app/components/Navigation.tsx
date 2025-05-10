@@ -3,6 +3,8 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter, usePathname } from 'next/navigation';
+import { AuthService } from '../services/auth.service';
+import LogoutModal from './LogoutModal';
 
 interface NavigationProps {
   user: any;
@@ -10,13 +12,22 @@ interface NavigationProps {
 
 export default function Navigation({ user }: NavigationProps) {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [showLogoutModal, setShowLogoutModal] = useState(false);
   const router = useRouter();
   const pathname = usePathname();
 
-  const handleLogout = () => {
-    localStorage.removeItem('user');
-    localStorage.removeItem('token');
+  const handleLogoutClick = () => {
+    setShowLogoutModal(true);
+  };
+
+  const handleConfirmLogout = () => {
+    AuthService.logout();
     router.push('/login');
+    setShowLogoutModal(false);
+  };
+
+  const handleCancelLogout = () => {
+    setShowLogoutModal(false);
   };
 
   const isActive = (path: string) => {
@@ -61,6 +72,7 @@ export default function Navigation({ user }: NavigationProps) {
   };
 
   return (
+    <>
     <header className="bg-gradient-to-r from-teal-700 to-teal-800 text-white shadow-md">
       <div className="container mx-auto px-4 py-4">
         <div className="flex justify-between items-center">
@@ -128,8 +140,8 @@ export default function Navigation({ user }: NavigationProps) {
             <span>|</span>
             <span>Bonjour, {user?.username}</span>
             <button 
-              onClick={handleLogout}
-              className="bg-white text-blue-600 px-3 py-1 rounded-md hover:bg-blue-100 transition-colors"
+              onClick={handleLogoutClick}
+              className="bg-white/90 text-teal-700 px-4 py-2 rounded-lg hover:bg-white hover:shadow-md transition-all duration-300 font-medium"
             >
               Déconnexion
             </button>
@@ -141,34 +153,34 @@ export default function Navigation({ user }: NavigationProps) {
           <div className="md:hidden mt-4 space-y-2">
             <Link 
               href="/dashboard" 
-              className={`block py-2 hover:bg-blue-700 rounded px-2 ${isActive('/dashboard') ? 'bg-blue-700' : ''}`}
+              className={`block py-2 hover:bg-teal-700/30 rounded-lg px-3 ${isActive('/dashboard') ? 'bg-teal-700/40 shadow-sm' : ''}`}
             >
               Tableau de bord
             </Link>
             <Link 
               href="/family-tree" 
-              className={`block py-2 hover:bg-blue-700 rounded px-2 ${isActive('/family-tree') ? 'bg-blue-700' : ''}`}
+              className={`block py-2 hover:bg-teal-700/30 rounded-lg px-3 ${isActive('/family-tree') ? 'bg-teal-700/40 shadow-sm' : ''}`}
             >
               Arbre généalogique
             </Link>
             <Link 
               href="/search" 
-              className={`block py-2 hover:bg-blue-700 rounded px-2 ${isActive('/search') ? 'bg-blue-700' : ''}`}
+              className={`block py-2 hover:bg-teal-700/30 rounded-lg px-3 ${isActive('/search') ? 'bg-teal-700/40 shadow-sm' : ''}`}
             >
               Recherche
             </Link>
             <Link 
               href="/profile" 
-              className={`block py-2 hover:bg-blue-700 rounded px-2 ${isActive('/profile') ? 'bg-blue-700' : ''}`}
+              className={`block py-2 hover:bg-teal-700/30 rounded-lg px-3 ${isActive('/profile') ? 'bg-teal-700/40 shadow-sm' : ''}`}
             >
               Profil
             </Link>
-            <div className="pt-2 border-t border-blue-500">
+            <div className="pt-2 border-t border-teal-600/30">
               <span>Bonjour, {user?.username}</span>
             </div>
             <button 
-              onClick={handleLogout}
-              className="w-full text-left bg-white text-blue-600 px-3 py-1 rounded-md hover:bg-blue-100 transition-colors"
+              onClick={handleLogoutClick}
+              className="w-full text-left bg-white/90 text-teal-700 px-4 py-2 rounded-lg hover:bg-white hover:shadow-md transition-all duration-300 font-medium"
             >
               Déconnexion
             </button>
@@ -176,5 +188,11 @@ export default function Navigation({ user }: NavigationProps) {
         )}
       </div>
     </header>
+    <LogoutModal 
+      isOpen={showLogoutModal} 
+      onClose={handleCancelLogout} 
+      onConfirm={handleConfirmLogout} 
+    />
+    </>
   );
 }

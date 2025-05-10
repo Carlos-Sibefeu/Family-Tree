@@ -1,0 +1,70 @@
+/* Styles pour l'arbre généalogique */
+.family-tree-container {
+  height: 700px;
+  width: 100%;
+  border: 1px solid #e2e8f0;
+  border-radius: 0.5rem;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  overflow: hidden;
+  background-color: #f8fafc;
+}
+
+/* Styles pour les nœuds */
+.node-male {
+  background: linear-gradient(to bottom, #dbeafe, #93c5fd);
+  border: 2px solid #3b82f6;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.node-female {
+  background: linear-gradient(to bottom, #fbcfe8, #f9a8d4);
+  border: 2px solid #ec4899;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+/* Styles pour les images */
+.node-image {
+  border-radius: 50%;
+  border: 2px solid white;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+/* Styles pour les lignes de connexion */
+.family-tree-line {
+  stroke: #64748b;
+  stroke-width: 2px;
+}
+
+.family-tree-line-marriage {
+  stroke: #9333ea;
+  stroke-width: 2px;
+  stroke-dasharray: 5, 5;
+}
+
+/* Styles pour les contrôles de navigation */
+.family-tree-controls {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background-color: white;
+  border-radius: 4px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  padding: 8px;
+  display: flex;
+  gap: 8px;
+}
+
+.family-tree-control-button {
+  background-color: #f1f5f9;
+  border: 1px solid #cbd5e1;
+  border-radius: 4px;
+  padding: 4px 8px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.family-tree-control-button:hover {
+  background-color: #e2e8f0;
+}
