@@ -118,14 +118,6 @@ export default function PublicSidebar() {
             >
               Connexion
             </Link>
-            <Link
-              href="/routes"
-              className={`block py-2 px-4 rounded transition-colors ${
-                isActive('/routes') ? 'bg-teal-700/30 shadow-md backdrop-blur-sm' : 'hover:bg-teal-700/20 hover:translate-x-1'
-              }`}
-            >
-              Toutes les routes
-            </Link>
           </nav>
         </div>
         
