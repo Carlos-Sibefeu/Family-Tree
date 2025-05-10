@@ -153,6 +153,18 @@ export default function MembershipRequests() {
   const filteredRequests = statusFilter === 'all' 
     ? requests 
     : requests.filter(req => req.status === statusFilter);
+  
+    const showAccessCredentials = (requestId: number) => {
+      const request = requests.find(r => r.id === requestId);
+      if (!request || request.status !== 'approved') return;
+      
+      // Dans un cas réel, vous récupéreriez les identifiants existants de l'utilisateur depuis votre API
+      // Ici on simule en les régénérant
+      const username = generateUsername(request.firstName, request.lastName);
+      const password = "••••••••"; // Mot de passe masqué car on ne doit pas pouvoir le voir à nouveau
+      
+      setGeneratedCredentials({ username, password, requestId });
+    };
 
   return (
     <AdminLayout>
@@ -224,6 +236,10 @@ export default function MembershipRequests() {
                 <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Actions
                 </th>
+                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Revoir les paramètres d'accès
+                </th>
+                
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
@@ -274,29 +290,53 @@ export default function MembershipRequests() {
                       </span>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                      <button 
-                        onClick={() => setSelectedRequest(request)}
-                        className="text-indigo-600 hover:text-indigo-900 mr-3"
-                      >
-                        Détails
-                      </button>
-                      {request.status === 'pending' && (
-                        <>
-                          <button 
-                            onClick={() => approveRequest(request.id)}
-                            className="text-green-600 hover:text-green-900 mr-3"
-                          >
-                            Approuver
-                          </button>
-                          <button 
-                            onClick={() => rejectRequest(request.id)}
-                            className="text-red-600 hover:text-red-900"
-                          >
-                            Rejeter
-                          </button>
-                        </>
-                      )}
-                    </td>
+  <button 
+    onClick={() => setSelectedRequest(request)}
+    className="text-indigo-600 hover:text-indigo-900 mr-3"
+  >
+    Détails
+  </button>
+  {request.status === 'pending' && (
+    <>
+      <button 
+        onClick={() => approveRequest(request.id)}
+        className="text-green-600 hover:text-green-900 mr-3"
+      >
+        Approuver
+      </button>
+      <button 
+        onClick={() => rejectRequest(request.id)}
+        className="text-red-600 hover:text-red-900"
+      >
+        Rejeter
+      </button>
+    </>
+  )}
+</td>
+<td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+  {request.status === 'approved' ? (
+    <button 
+      onClick={() => {
+        // Pour les demandes approuvées, recréer les identifiants et afficher le modal
+        const username = generateUsername(request.firstName, request.lastName);
+        const password = generatePassword(); // Note: Dans un cas réel, vous ne régénéreriez pas le mot de passe ici
+        setGeneratedCredentials({ username, password, requestId: request.id });
+      }}
+      className="text-blue-600 hover:text-blue-900 px-2 py-1 border border-blue-300 rounded-md hover:bg-blue-50"
+    >
+      Voir identifiants
+    </button>
+  ) : request.status === 'pending' ? (
+    <button 
+      onClick={() => setSelectedRequest(request)}
+      className="text-gray-600 hover:text-gray-900 px-2 py-1 border border-gray-300 rounded-md hover:bg-gray-50"
+    >
+      Paramètres d'accès
+    </button>
+  ) : (
+    <span className="text-gray-400">Non disponible</span>
+  )}
+</td>
                   </tr>
                 ))
               )}
@@ -431,9 +471,11 @@ export default function MembershipRequests() {
           <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
             <div className="bg-white rounded-lg shadow-xl max-w-md w-full">
               <div className="flex justify-between items-start p-6 border-b border-gray-200">
-                <h3 className="text-xl font-semibold">
-                  Identifiants générés
-                </h3>
+              <h3 className="text-xl font-semibold">
+  {requests.find(r => r.id === generatedCredentials.requestId)?.status === 'approved' 
+    ? "Paramètres d'accès" 
+    : "Identifiants générés"}
+</h3>
                 <button 
                   onClick={() => setGeneratedCredentials(null)}
                   className="text-gray-400 hover:text-gray-500"
@@ -444,12 +486,13 @@ export default function MembershipRequests() {
                 </button>
               </div>
               
-              <div className="p-6">
-                <div className="bg-green-50 border border-green-200 rounded-md p-4 mb-6">
-                  <p className="text-green-800">
-                    La demande a été approuvée avec succès. Voici les identifiants générés pour l'utilisateur.
-                  </p>
-                </div>
+              {requests.find(r => r.id === generatedCredentials.requestId)?.status !== 'approved' && (
+  <div className="bg-green-50 border border-green-200 rounded-md p-4 mb-6">
+    <p className="text-green-800">
+      La demande a été approuvée avec succès. Voici les identifiants générés pour l'utilisateur.
+    </p>
+  </div>
+)}
                 
                 <div className="space-y-4">
                   <div>
@@ -500,9 +543,7 @@ export default function MembershipRequests() {
                 </div>
                 
                 <div className="mt-6">
-                  <p className="text-sm text-gray-600 mb-4">
-                    Veuillez envoyer ces identifiants à l'utilisateur par email. L'utilisateur pourra se connecter avec ces identifiants et changer son mot de passe ultérieurement.
-                  </p>
+                  
                   
                   <div className="flex justify-end space-x-4">
                     <button 
@@ -511,21 +552,12 @@ export default function MembershipRequests() {
                     >
                       Fermer
                     </button>
-                    <button 
-                      onClick={() => {
-                        // Simuler l'envoi d'un email
-                        alert('Email envoyé avec succès à l\'utilisateur!');
-                        setGeneratedCredentials(null);
-                      }}
-                      className="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700"
-                    >
-                      Envoyer par email
-                    </button>
+                   
                   </div>
                 </div>
               </div>
             </div>
-          </div>
+          
         )}
       </div>
     </AdminLayout>
