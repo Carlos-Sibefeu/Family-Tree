@@ -9,7 +9,7 @@ export default function About() {
       <div className="w-full max-w-4xl mx-auto">
         <h1 className="text-4xl font-bold text-center mb-8">À propos du projet</h1>
         
-        <div className="bg-white shadow-md rounded-lg p-8 mb-8">
+        <div className="bg-white shadow-md rounded-lg p-8 mb-8 text-gray-800">
           <h2 className="text-2xl font-semibold mb-4">Arbre Généalogique avec des Algorithmes de Graphes</h2>
           
           <div className="prose max-w-none">
