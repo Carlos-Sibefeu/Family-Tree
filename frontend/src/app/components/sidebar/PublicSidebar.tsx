@@ -9,7 +9,38 @@ export default function PublicSidebar() {
   const pathname = usePathname();
 
   const isActive = (path: string) => {
-    return pathname === path;
+    // Si le chemin est exactement le même, c'est actif
+    if (pathname === path) return true;
+    
+    // Si le chemin actuel commence par le chemin du lien + '/', c'est actif
+    if (pathname?.startsWith(path + '/')) return true;
+    
+    // Cas spéciaux pour certaines sections publiques
+    switch (path) {
+      case '/':
+        // La page d'accueil est active uniquement sur sa propre page
+        return pathname === '/';
+        
+      case '/about':
+        // Toutes les pages à propos
+        return pathname?.startsWith('/about');
+        
+      case '/membership':
+        // Toutes les pages d'adhésion
+        return pathname?.startsWith('/membership');
+        
+      case '/login':
+        // Page de connexion
+        return pathname === '/login';
+        
+      case '/register':
+        // Page d'inscription
+        return pathname === '/register';
+        
+      default:
+        // Par défaut, vérifie si le chemin commence par le chemin du lien
+        return pathname?.startsWith(path);
+    }
   };
 
   return (
@@ -18,7 +49,7 @@ export default function PublicSidebar() {
       <div className="md:hidden fixed top-4 left-4 z-50">
         <button
           onClick={() => setIsOpen(!isOpen)}
-          className="bg-blue-600 text-white p-2 rounded-md shadow-md"
+          className="bg-teal-700 text-white p-2 rounded-lg shadow-lg hover:bg-teal-800 transition-all duration-300"
         >
           <svg
             className="h-6 w-6"
@@ -47,7 +78,7 @@ export default function PublicSidebar() {
 
       {/* Sidebar */}
       <div
-        className={`fixed top-0 left-0 h-full bg-blue-800 text-white w-64 shadow-lg transform transition-transform duration-300 ease-in-out z-40 ${
+        className={`fixed top-0 left-0 h-full bg-gradient-to-b from-teal-800 to-slate-800 text-white w-64 shadow-lg transform transition-transform duration-300 ease-in-out z-40 ${
           isOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'
         }`}
       >
@@ -58,7 +89,7 @@ export default function PublicSidebar() {
             <Link
               href="/"
               className={`block py-2 px-4 rounded transition-colors ${
-                isActive('/') ? 'bg-blue-700' : 'hover:bg-blue-700'
+                isActive('/') ? 'bg-teal-700/30 shadow-md backdrop-blur-sm' : 'hover:bg-teal-700/20 hover:translate-x-1'
               }`}
             >
               Accueil
@@ -66,7 +97,7 @@ export default function PublicSidebar() {
             <Link
               href="/about"
               className={`block py-2 px-4 rounded transition-colors ${
-                isActive('/about') ? 'bg-blue-700' : 'hover:bg-blue-700'
+                isActive('/about') ? 'bg-teal-700/30 shadow-md backdrop-blur-sm' : 'hover:bg-teal-700/20 hover:translate-x-1'
               }`}
             >
               À propos
@@ -74,7 +105,7 @@ export default function PublicSidebar() {
             <Link
               href="/membership/apply"
               className={`block py-2 px-4 rounded transition-colors ${
-                isActive('/membership/apply') ? 'bg-blue-700' : 'hover:bg-blue-700'
+                isActive('/membership/apply') ? 'bg-teal-700/30 shadow-md backdrop-blur-sm' : 'hover:bg-teal-700/20 hover:translate-x-1'
               }`}
             >
               Demande d'adhésion
@@ -82,7 +113,7 @@ export default function PublicSidebar() {
             <Link
               href="/login"
               className={`block py-2 px-4 rounded transition-colors ${
-                isActive('/login') ? 'bg-blue-700' : 'hover:bg-blue-700'
+                isActive('/login') ? 'bg-teal-700/30 shadow-md backdrop-blur-sm' : 'hover:bg-teal-700/20 hover:translate-x-1'
               }`}
             >
               Connexion
@@ -90,7 +121,7 @@ export default function PublicSidebar() {
             <Link
               href="/routes"
               className={`block py-2 px-4 rounded transition-colors ${
-                isActive('/routes') ? 'bg-blue-700' : 'hover:bg-blue-700'
+                isActive('/routes') ? 'bg-teal-700/30 shadow-md backdrop-blur-sm' : 'hover:bg-teal-700/20 hover:translate-x-1'
               }`}
             >
               Toutes les routes
@@ -99,7 +130,7 @@ export default function PublicSidebar() {
         </div>
         
         <div className="absolute bottom-0 left-0 right-0 p-6">
-          <div className="text-sm text-blue-300">
+          <div className="text-sm text-teal-300">
             © {new Date().getFullYear()} Arbre Généalogique
             <br />
             Projet de Recherche Opérationnelle

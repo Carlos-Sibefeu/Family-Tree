@@ -2,14 +2,58 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
+import { AuthService } from '../../services/auth.service';
 
 export default function UserSidebar() {
   const [isOpen, setIsOpen] = useState(false);
   const pathname = usePathname();
+  const router = useRouter();
 
   const isActive = (path: string) => {
-    return pathname === path || pathname?.startsWith(path + '/');
+    // Si le chemin est exactement le même, c'est actif
+    if (pathname === path) return true;
+    
+    // Si le chemin actuel commence par le chemin du lien + '/', c'est actif
+    if (pathname?.startsWith(path + '/')) return true;
+    
+    // Cas spéciaux pour certaines sections
+    switch (path) {
+      case '/dashboard':
+        // Le tableau de bord est actif uniquement sur sa propre page
+        return pathname === '/dashboard';
+        
+      case '/family-tree':
+        // Toutes les pages commençant par /family-tree sont dans la section arbre généalogique
+        // Mais pas /family-tree/analysis qui a son propre lien
+        if (pathname === '/family-tree/analysis') return false;
+        return pathname?.startsWith('/family-tree');
+        
+      case '/family-tree/analysis':
+        // Section analyse spécifique
+        return pathname === '/family-tree/analysis';
+        
+      case '/search':
+        // Toutes les pages de recherche
+        return pathname?.startsWith('/search');
+        
+      case '/algorithms':
+        // Toutes les pages d'algorithmes
+        return pathname?.startsWith('/algorithms');
+        
+      case '/profile':
+        // Toutes les pages de profil
+        return pathname?.startsWith('/profile');
+        
+      default:
+        // Par défaut, vérifie si le chemin commence par le chemin du lien
+        return pathname?.startsWith(path);
+    }
+  };
+
+  const handleLogout = () => {
+    AuthService.logout();
+    router.push('/login');
   };
 
   return (
@@ -18,7 +62,7 @@ export default function UserSidebar() {
       <div className="md:hidden fixed top-4 left-4 z-50">
         <button
           onClick={() => setIsOpen(!isOpen)}
-          className="bg-blue-700 text-white p-2 rounded-md shadow-md"
+          className="bg-teal-700 text-white p-2 rounded-lg shadow-lg hover:bg-teal-800 transition-all duration-300"
         >
           <svg
             className="h-6 w-6"
@@ -47,19 +91,19 @@ export default function UserSidebar() {
 
       {/* Sidebar */}
       <div
-        className={`fixed top-0 left-0 h-full bg-blue-700 text-white w-64 shadow-lg transform transition-transform duration-300 ease-in-out z-40 ${
+        className={`fixed top-0 left-0 h-full bg-gradient-to-b from-teal-800 to-slate-800 text-white w-64 shadow-xl transform transition-transform duration-300 ease-in-out z-40 ${
           isOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'
         }`}
       >
         <div className="p-6">
-          <h1 className="text-2xl font-bold mb-8">Arbre Généalogique</h1>
-          <div className="h-1 w-12 bg-white mb-6"></div>
+          <h1 className="text-2xl font-bold mb-8 text-transparent bg-clip-text bg-gradient-to-r from-white to-teal-200">Arbre Généalogique</h1>
+          <div className="h-1 w-20 bg-gradient-to-r from-teal-400 to-slate-300 rounded-full mb-8 opacity-80"></div>
           
-          <nav className="space-y-1">
+          <nav className="space-y-2">
             <Link
               href="/dashboard"
-              className={`flex items-center px-4 py-2 rounded-md transition-colors ${
-                isActive('/dashboard') ? 'bg-blue-800' : 'hover:bg-blue-800'
+              className={`flex items-center px-4 py-3 rounded-lg transition-all duration-200 ${
+                isActive('/dashboard') ? 'bg-teal-700/30 shadow-md backdrop-blur-sm' : 'hover:bg-teal-700/20 hover:translate-x-1'
               }`}
             >
               <svg className="h-5 w-5 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -70,8 +114,8 @@ export default function UserSidebar() {
             
             <Link
               href="/family-tree"
-              className={`flex items-center px-4 py-2 rounded-md transition-colors ${
-                isActive('/family-tree') ? 'bg-blue-800' : 'hover:bg-blue-800'
+              className={`flex items-center px-4 py-3 rounded-lg transition-all duration-200 ${
+                isActive('/family-tree') ? 'bg-teal-700/30 shadow-md backdrop-blur-sm' : 'hover:bg-teal-700/20 hover:translate-x-1'
               }`}
             >
               <svg className="h-5 w-5 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -82,8 +126,8 @@ export default function UserSidebar() {
             
             <Link
               href="/family-tree/analysis"
-              className={`flex items-center px-4 py-2 rounded-md transition-colors ${
-                isActive('/family-tree/analysis') ? 'bg-blue-800' : 'hover:bg-blue-800'
+              className={`flex items-center px-4 py-3 rounded-lg transition-all duration-200 ${
+                isActive('/family-tree/analysis') ? 'bg-teal-700/30 shadow-md backdrop-blur-sm' : 'hover:bg-teal-700/20 hover:translate-x-1'
               }`}
             >
               <svg className="h-5 w-5 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -94,8 +138,8 @@ export default function UserSidebar() {
             
             <Link
               href="/search"
-              className={`flex items-center px-4 py-2 rounded-md transition-colors ${
-                isActive('/search') ? 'bg-blue-800' : 'hover:bg-blue-800'
+              className={`flex items-center px-4 py-3 rounded-lg transition-all duration-200 ${
+                isActive('/search') ? 'bg-teal-700/30 shadow-md backdrop-blur-sm' : 'hover:bg-teal-700/20 hover:translate-x-1'
               }`}
             >
               <svg className="h-5 w-5 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -106,8 +150,8 @@ export default function UserSidebar() {
             
             <Link
               href="/algorithms"
-              className={`flex items-center px-4 py-2 rounded-md transition-colors ${
-                isActive('/algorithms') ? 'bg-blue-800' : 'hover:bg-blue-800'
+              className={`flex items-center px-4 py-3 rounded-lg transition-all duration-200 ${
+                isActive('/algorithms') ? 'bg-teal-700/30 shadow-md backdrop-blur-sm' : 'hover:bg-teal-700/20 hover:translate-x-1'
               }`}
             >
               <svg className="h-5 w-5 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -118,8 +162,8 @@ export default function UserSidebar() {
             
             <Link
               href="/profile"
-              className={`flex items-center px-4 py-2 rounded-md transition-colors ${
-                isActive('/profile') ? 'bg-blue-800' : 'hover:bg-blue-800'
+              className={`flex items-center px-4 py-3 rounded-lg transition-all duration-200 ${
+                isActive('/profile') ? 'bg-teal-700/30 shadow-md backdrop-blur-sm' : 'hover:bg-teal-700/20 hover:translate-x-1'
               }`}
             >
               <svg className="h-5 w-5 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -130,16 +174,16 @@ export default function UserSidebar() {
           </nav>
         </div>
         
-        <div className="absolute bottom-0 left-0 right-0 p-6 border-t border-blue-600">
-          <Link
-            href="/logout"
-            className="flex items-center px-4 py-2 rounded-md hover:bg-blue-800 transition-colors"
+        <div className="absolute bottom-0 left-0 right-0 p-6 border-t border-teal-700/20">
+          <button
+            onClick={handleLogout}
+            className="flex items-center w-full px-4 py-3 rounded-lg hover:bg-slate-600/30 transition-all duration-300 text-left group"
           >
             <svg className="h-5 w-5 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
             </svg>
             Déconnexion
-          </Link>
+          </button>
         </div>
       </div>
     </>

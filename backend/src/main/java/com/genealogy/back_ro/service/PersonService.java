@@ -12,8 +12,24 @@ import java.util.Optional;
 
 @Service
 public class PersonService {
+
+    @Autowired
+    private GenealogySearchService genealogySearchService;
+
     @Autowired
     private PersonRepository personRepository;
+
+    public List<Person> findRelationshipPath(Long person1Id, Long person2Id) {
+        return genealogySearchService.findRelationshipPath(person1Id, person2Id);
+    }
+
+    public Person findCommonAncestor(Long person1Id, Long person2Id) {
+        return genealogySearchService.findCommonAncestor(person1Id, person2Id);
+    }
+
+    public List<Person> findDescendants(Long personId, int maxDepth) {
+        return genealogySearchService.findDescendants(personId, maxDepth);
+    }
 
     public List<Person> getAllPersons() {
         return personRepository.findAll();
@@ -21,6 +37,60 @@ public class PersonService {
 
     public Optional<Person> getPersonById(Long id) {
         return personRepository.findById(id);
+    }
+
+    public Person savePerson(Person person) {
+        return personRepository.save(person);
+    }
+
+    public void deletePerson(Long id) {
+        personRepository.deleteById(id);
+    }
+
+    @Transactional
+    public Person updatePerson(Long id, Person updatedPerson) {
+        Person existingPerson = personRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Person not found"));
+
+        existingPerson.setFirstName(updatedPerson.getFirstName());
+        existingPerson.setLastName(updatedPerson.getLastName());
+        existingPerson.setBirthDate(updatedPerson.getBirthDate());
+        existingPerson.setDeathDate(updatedPerson.getDeathDate());
+        existingPerson.setBirthPlace(updatedPerson.getBirthPlace());
+        existingPerson.setPhoto(updatedPerson.getPhoto());
+        existingPerson.setBiography(updatedPerson.getBiography());
+
+        return personRepository.save(existingPerson);
+    }
+
+    @Transactional
+    public Person addParent(Long childId, Long parentId) {
+        Person child = personRepository.findById(childId)
+                .orElseThrow(() -> new RuntimeException("Child not found"));
+        Person parent = personRepository.findById(parentId)
+                .orElseThrow(() -> new RuntimeException("Parent not found"));
+
+        child.addParent(parent);
+        return personRepository.save(child);
+    }
+
+    @Transactional
+    public Person removeParent(Long childId, Long parentId) {
+        Person child = personRepository.findById(childId)
+                .orElseThrow(() -> new RuntimeException("Child not found"));
+        Person parent = personRepository.findById(parentId)
+                .orElseThrow(() -> new RuntimeException("Parent not found"));
+
+        child.removeParent(parent);
+        return personRepository.save(child);
+    }
+
+    public List<Person> getChildrenByParentId(Long parentId) {
+        return personRepository.findChildrenByParentId(parentId);
+    }
+
+    public List<Person> getParentsByChildId(Long childId) {
+        return personRepository.findParentsByChildId(childId);
     }
 
     public List<Person> searchPersonsByName(String firstName, String lastName) {
@@ -37,62 +107,5 @@ public class PersonService {
     public Person createPerson(Person person, User currentUser) {
         person.setCreatedBy(currentUser);
         return personRepository.save(person);
-    }
-
-    @Transactional
-    public Person updatePerson(Long id, Person personDetails) {
-        return personRepository.findById(id)
-                .map(person -> {
-                    person.setFirstName(personDetails.getFirstName());
-                    person.setLastName(personDetails.getLastName());
-                    person.setBirthDate(personDetails.getBirthDate());
-                    person.setDeathDate(personDetails.getDeathDate());
-                    person.setBirthPlace(personDetails.getBirthPlace());
-                    person.setBiography(personDetails.getBiography());
-                    if (personDetails.getPhoto() != null) {
-                        person.setPhoto(personDetails.getPhoto());
-                    }
-                    return personRepository.save(person);
-                })
-                .orElse(null);
-    }
-
-    @Transactional
-    public void deletePerson(Long id) {
-        personRepository.deleteById(id);
-    }
-
-    @Transactional
-    public Person addParent(Long childId, Long parentId) {
-        Person child = personRepository.findById(childId).orElse(null);
-        Person parent = personRepository.findById(parentId).orElse(null);
-        
-        if (child != null && parent != null) {
-            child.addParent(parent);
-            return personRepository.save(child);
-        }
-        
-        return null;
-    }
-
-    @Transactional
-    public Person removeParent(Long childId, Long parentId) {
-        Person child = personRepository.findById(childId).orElse(null);
-        Person parent = personRepository.findById(parentId).orElse(null);
-        
-        if (child != null && parent != null) {
-            child.removeParent(parent);
-            return personRepository.save(child);
-        }
-        
-        return null;
-    }
-
-    public List<Person> getChildrenByParentId(Long parentId) {
-        return personRepository.findChildrenByParentId(parentId);
-    }
-
-    public List<Person> getParentsByChildId(Long childId) {
-        return personRepository.findParentsByChildId(childId);
     }
 }

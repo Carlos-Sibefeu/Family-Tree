@@ -20,11 +20,48 @@ export default function Navigation({ user }: NavigationProps) {
   };
 
   const isActive = (path: string) => {
-    return pathname === path;
+    // Si le chemin est exactement le même, c'est actif
+    if (pathname === path) return true;
+    
+    // Si le chemin actuel commence par le chemin du lien + '/', c'est actif
+    if (pathname?.startsWith(path + '/')) return true;
+    
+    // Cas spéciaux pour certaines sections
+    switch (path) {
+      case '/dashboard':
+        // Le tableau de bord est actif uniquement sur sa propre page
+        return pathname === '/dashboard';
+        
+      case '/family-tree':
+        // Toutes les pages commençant par /family-tree sont dans la section arbre généalogique
+        // Mais pas /family-tree/analysis qui a son propre lien
+        if (pathname === '/family-tree/analysis') return false;
+        return pathname?.startsWith('/family-tree');
+        
+      case '/family-tree/analysis':
+        // Section analyse spécifique
+        return pathname === '/family-tree/analysis';
+        
+      case '/search':
+        // Toutes les pages de recherche
+        return pathname?.startsWith('/search');
+        
+      case '/algorithms':
+        // Toutes les pages d'algorithmes
+        return pathname?.startsWith('/algorithms');
+        
+      case '/profile':
+        // Toutes les pages de profil
+        return pathname?.startsWith('/profile');
+        
+      default:
+        // Par défaut, vérifie si le chemin commence par le chemin du lien
+        return pathname?.startsWith(path);
+    }
   };
 
   return (
-    <header className="bg-blue-600 text-white shadow-md">
+    <header className="bg-gradient-to-r from-teal-700 to-teal-800 text-white shadow-md">
       <div className="container mx-auto px-4 py-4">
         <div className="flex justify-between items-center">
           <Link href="/dashboard" className="text-2xl font-bold">

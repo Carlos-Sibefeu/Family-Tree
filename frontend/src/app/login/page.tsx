@@ -79,11 +79,11 @@ export default function Login() {
         <div className="bg-white shadow-md rounded-lg p-8">
           <h1 className="text-3xl font-bold mb-6 text-center">Connexion</h1>
           
-          <div className="bg-blue-50 border-l-4 border-blue-500 p-4 mb-6">
-            <p className="text-sm text-blue-700">
+          <div className="bg-teal-50 border-l-4 border-teal-500 p-4 mb-6">
+            <p className="text-sm text-teal-700">
               <strong>Utilisateur normal :</strong> Utilisez n'importe quel nom d'utilisateur/mot de passe (sauf admin/admin).
             </p>
-            <p className="text-sm text-blue-700 mt-2">
+            <p className="text-sm text-teal-700 mt-2">
               <strong>Administrateur :</strong> Utilisez admin/admin pour accéder au tableau de bord administrateur.
             </p>
           </div>
@@ -126,14 +126,14 @@ export default function Login() {
             <div>
               <button
                 type="submit"
-                className="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-md transition-colors"
+                className="w-full bg-teal-700 hover:bg-teal-800 text-white font-medium py-2 px-4 rounded-md transition-colors"
                 disabled={loading}
               >
                 {loading ? 'Connexion en cours...' : 'Se connecter'}
               </button>
               
               <div className="mt-4 text-center">
-                <Link href="/routes" className="text-blue-600 hover:text-blue-800 text-sm">
+                <Link href="/routes" className="text-teal-700 hover:text-teal-800 text-sm">
                   Voir toutes les routes disponibles
                 </Link>
               </div>
@@ -143,7 +143,7 @@ export default function Login() {
           <div className="mt-6 text-center">
             <p className="text-sm text-gray-600">
               Pas encore membre ?{' '}
-              <Link href="/membership/apply" className="font-medium text-blue-600 hover:text-blue-500">
+              <Link href="/membership/apply" className="font-medium text-teal-700 hover:text-teal-600">
                 Faire une demande d'adhésion
               </Link>
             </p>

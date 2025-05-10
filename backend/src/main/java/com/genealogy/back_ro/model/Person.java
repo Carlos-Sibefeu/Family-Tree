@@ -5,8 +5,7 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 
 import java.time.LocalDate;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
 
 @Entity
 @Table(name = "persons")
@@ -55,6 +54,32 @@ public class Person {
     @JoinColumn(name = "created_by")
     private User createdBy;
 
+    // Relations avec d'autres personnes (pour les algorithmes de graphe)
+    @ManyToMany
+    @JoinTable(
+        name = "person_relationships",
+        joinColumns = @JoinColumn(name = "person1_id"),
+        inverseJoinColumns = @JoinColumn(name = "person2_id")
+    )
+    private Set<Person> relatedPersons = new HashSet<>();
+
+    @ElementCollection
+    @CollectionTable(
+        name = "person_relationship_types",
+        joinColumns = @JoinColumn(name = "person_id")
+    )
+    @Column(name = "relationship_type")
+    private Set<String> relationshipTypes = new HashSet<>();
+
+    @ElementCollection
+    @CollectionTable(
+        name = "person_relationship_weights",
+        joinColumns = @JoinColumn(name = "person_id")
+    )
+    @Column(name = "relationship_weight")
+    private Map<Long, Integer> relationshipWeights = new HashMap<>();
+
+    // Constructeurs
     public Person() {
     }
 

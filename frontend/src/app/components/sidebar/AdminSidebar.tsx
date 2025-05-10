@@ -9,7 +9,38 @@ export default function AdminSidebar() {
   const pathname = usePathname();
 
   const isActive = (path: string) => {
-    return pathname === path || pathname?.startsWith(path + '/');
+    // Si le chemin est exactement le même, c'est actif
+    if (pathname === path) return true;
+    
+    // Si le chemin actuel commence par le chemin du lien + '/', c'est actif
+    if (pathname?.startsWith(path + '/')) return true;
+    
+    // Cas spéciaux pour certaines sections admin
+    switch (path) {
+      case '/admin/dashboard':
+        // Le tableau de bord admin est actif uniquement sur sa propre page
+        return pathname === '/admin/dashboard';
+        
+      case '/admin/users':
+        // Toutes les pages de gestion des utilisateurs
+        return pathname?.startsWith('/admin/users');
+        
+      case '/admin/family-tree':
+        // Toutes les pages de gestion de l'arbre généalogique
+        return pathname?.startsWith('/admin/family-tree');
+        
+      case '/admin/requests':
+        // Toutes les pages de demandes d'adhésion
+        return pathname?.startsWith('/admin/requests');
+        
+      case '/admin/settings':
+        // Toutes les pages de paramètres
+        return pathname?.startsWith('/admin/settings');
+        
+      default:
+        // Par défaut, vérifie si le chemin commence par le chemin du lien
+        return pathname?.startsWith(path);
+    }
   };
 
   return (

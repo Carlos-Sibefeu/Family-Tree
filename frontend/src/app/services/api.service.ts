@@ -185,4 +185,46 @@ export class ApiService {
       return await ApiService.request(`/graph/closest-cousin?personId=${personId}`);
     }
   };
+
+  /**
+   * Méthodes pour les appels API de gestion des demandes d'adhésion
+   */
+  static membership = {
+    // Vérifier l'éligibilité pour faire une demande d'adhésion
+    checkEligibility: async () => {
+      return await ApiService.request('/membership/check-eligibility');
+    },
+    
+    // Créer une nouvelle demande d'adhésion
+    createRequest: async (message: string) => {
+      return await ApiService.request('/membership/request', {
+        method: 'POST',
+        body: JSON.stringify({ message })
+      });
+    },
+    
+    // Récupérer l'historique des demandes de l'utilisateur connecté
+    getMyRequests: async () => {
+      return await ApiService.request('/membership/my-requests');
+    },
+    
+    // Récupérer toutes les demandes en attente (admin uniquement)
+    getPendingRequests: async () => {
+      return await ApiService.request('/membership/pending-requests');
+    },
+    
+    // Approuver une demande d'adhésion (admin uniquement)
+    approveRequest: async (requestId: number) => {
+      return await ApiService.request(`/membership/approve/${requestId}`, {
+        method: 'PUT'
+      });
+    },
+    
+    // Rejeter une demande d'adhésion (admin uniquement)
+    rejectRequest: async (requestId: number) => {
+      return await ApiService.request(`/membership/reject/${requestId}`, {
+        method: 'PUT'
+      });
+    }
+  };
 }

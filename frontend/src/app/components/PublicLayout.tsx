@@ -8,7 +8,7 @@ interface PublicLayoutProps {
 
 export default function PublicLayout({ children }: PublicLayoutProps) {
   return (
-    <div className="flex min-h-screen bg-blue-700 text-white">
+    <div className="flex min-h-screen bg-gradient-to-b from-teal-800 to-slate-800 text-white">
       <PublicSidebar />
       
       <main className="flex-grow md:ml-64 p-6">
