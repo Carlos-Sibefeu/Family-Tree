@@ -1,0 +1,106 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = "file:../family_tree.db"
+}
+
+// Modèle pour les utilisateurs
+model User {
+  id                Int                @id @default(autoincrement())
+  username          String             @unique
+  email             String             @unique
+  password          String
+  roles             Role[]
+  membershipApproved Boolean            @default(false)
+  createdPersons    Person[]
+  processedRequests MembershipRequest[] @relation("ProcessedBy")
+  membershipRequest MembershipRequest?  @relation("CreatedUser")
+  createdAt         DateTime           @default(now())
+  updatedAt         DateTime           @updatedAt
+}
+
+// Modèle pour les rôles
+model Role {
+  id    Int    @id @default(autoincrement())
+  name  String @unique
+  users User[]
+}
+
+// Modèle pour les personnes dans l'arbre généalogique
+model Person {
+  id          Int       @id @default(autoincrement())
+  firstName   String
+  lastName    String
+  birthDate   DateTime?
+  deathDate   DateTime?
+  birthPlace  String?
+  photo       Bytes?
+  biography   String?
+  createdBy   User?     @relation(fields: [createdById], references: [id])
+  createdById Int?
+  parents     Person[]  @relation("ParentChild")
+  children    Person[]  @relation("ParentChild")
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  // Relations explicites (pour les algorithmes de graphe)
+  relationshipsAsSource Relationship[] @relation("Source")
+  relationshipsAsTarget Relationship[] @relation("Target")
+}
+
+// Modèle pour les relations entre personnes
+model Relationship {
+  id        Int              @id @default(autoincrement())
+  source    Person           @relation("Source", fields: [sourceId], references: [id])
+  sourceId  Int
+  target    Person           @relation("Target", fields: [targetId], references: [id])
+  targetId  Int
+  type      RelationshipType
+  weight    Int              @default(1)
+  createdAt DateTime         @default(now())
+  updatedAt DateTime         @updatedAt
+
+  @@unique([sourceId, targetId, type])
+}
+
+// Modèle pour les demandes d'adhésion
+model MembershipRequest {
+  id            Int           @id @default(autoincrement())
+  fullName      String
+  email         String
+  phoneNumber   String?
+  address       String?
+  reason        String
+  status        RequestStatus @default(PENDING)
+  requestDate   DateTime      @default(now())
+  processedDate DateTime?
+  processedBy   User?         @relation("ProcessedBy", fields: [processedById], references: [id])
+  processedById Int?
+  createdUser   User?         @relation("CreatedUser", fields: [createdUserId], references: [id])
+  createdUserId Int?          @unique
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+}
+
+// Énumérations
+enum RelationshipType {
+  PARENT_CHILD
+  SIBLING
+  SPOUSE
+  COUSIN
+  UNCLE_NEPHEW
+  GRANDPARENT
+  OTHER
+}
+
+enum RequestStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
