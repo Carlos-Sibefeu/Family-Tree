@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import { FamilyTreeService } from '../../services/family-tree.service';
 
 export default function AddFamilyMember() {
   const [user, setUser] = useState<any>(null);
@@ -19,6 +20,22 @@ export default function AddFamilyMember() {
     mother: '',
     father: '',
     photo: null as File | null
+  });
+  
+  // États pour gérer les nouveaux parents
+  const [addNewMother, setAddNewMother] = useState(false);
+  const [addNewFather, setAddNewFather] = useState(false);
+  const [newMotherData, setNewMotherData] = useState({
+    firstName: '',
+    lastName: '',
+    birthDate: '',
+    birthPlace: ''
+  });
+  const [newFatherData, setNewFatherData] = useState({
+    firstName: '',
+    lastName: '',
+    birthDate: '',
+    birthPlace: ''
   });
   const [submitting, setSubmitting] = useState(false);
   const [message, setMessage] = useState({ type: '', text: '' });
@@ -38,24 +55,63 @@ export default function AddFamilyMember() {
       const userData = JSON.parse(storedUser);
       setUser(userData);
       
-      // Simuler le chargement des données des personnes
-      // Dans un projet réel, vous feriez un appel API ici
-      setTimeout(() => {
-        setPersons(samplePersons);
-        setLoading(false);
-      }, 1000);
+      // Charger les données des personnes depuis le service
+      const familyData = FamilyTreeService.getSimulatedFamilyData();
+      setPersons(familyData.persons);
+      setLoading(false);
     } catch (error) {
       console.error('Error:', error);
       setLoading(false);
     }
   }, [router]);
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
-    setFormData({
-      ...formData,
+    
+    // Réinitialiser l'option d'ajout de nouveau parent si l'utilisateur sélectionne un parent existant
+    if (name === 'mother' && value !== 'new') {
+      setAddNewMother(false);
+    } else if (name === 'mother' && value === 'new') {
+      setAddNewMother(true);
+      setFormData(prev => ({
+        ...prev,
+        mother: ''
+      }));
+      return;
+    }
+    
+    if (name === 'father' && value !== 'new') {
+      setAddNewFather(false);
+    } else if (name === 'father' && value === 'new') {
+      setAddNewFather(true);
+      setFormData(prev => ({
+        ...prev,
+        father: ''
+      }));
+      return;
+    }
+    
+    setFormData(prev => ({
+      ...prev,
       [name]: value
-    });
+    }));
+  };
+  
+  // Gestion des changements pour les nouveaux parents
+  const handleNewMotherChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setNewMotherData(prev => ({
+      ...prev,
+      [name]: value
+    }));
+  };
+  
+  const handleNewFatherChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setNewFatherData(prev => ({
+      ...prev,
+      [name]: value
+    }));
   };
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -69,45 +125,111 @@ export default function AddFamilyMember() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+    setSubmitting(true);
+    setMessage({ type: '', text: '' });
+
+    // Validation
     if (!formData.firstName || !formData.lastName) {
-      setMessage({ type: 'error', text: 'Le prénom et le nom sont obligatoires' });
+      setMessage({ type: 'error', text: 'Veuillez remplir tous les champs obligatoires' });
+      setSubmitting(false);
       return;
     }
     
-    setSubmitting(true);
-    setMessage({ type: '', text: '' });
+    // Validation des nouveaux parents
+    if (addNewMother && (!newMotherData.firstName || !newMotherData.lastName)) {
+      setMessage({ type: 'error', text: 'Veuillez remplir les champs obligatoires pour la nouvelle mère' });
+      setSubmitting(false);
+      return;
+    }
     
+    if (addNewFather && (!newFatherData.firstName || !newFatherData.lastName)) {
+      setMessage({ type: 'error', text: 'Veuillez remplir les champs obligatoires pour le nouveau père' });
+      setSubmitting(false);
+      return;
+    }
+
     try {
-      // Simuler l'envoi des données au backend
-      // Dans un projet réel, vous feriez un appel API ici
-      console.log('Form data submitted:', formData);
+      // Créer les nouveaux parents si nécessaire
+      let motherId = formData.mother;
+      let fatherId = formData.father;
       
-      setTimeout(() => {
-        setMessage({ type: 'success', text: 'Membre ajouté avec succès à l\'arbre généalogique!' });
-        setSubmitting(false);
+      if (addNewMother) {
+        // Ajouter la nouvelle mère
+        const newMother = FamilyTreeService.addSimulatedPerson({
+          firstName: newMotherData.firstName,
+          lastName: newMotherData.lastName,
+          gender: 'female',
+          birthDate: newMotherData.birthDate || undefined,
+          birthPlace: newMotherData.birthPlace || undefined
+        });
         
-        // Réinitialiser le formulaire après 2 secondes
-        setTimeout(() => {
-          setFormData({
-            firstName: '',
-            lastName: '',
-            gender: 'male',
-            birthDate: '',
-            birthPlace: '',
-            deathDate: '',
-            biography: '',
-            mother: '',
-            father: '',
-            photo: null
-          });
-          
-          // Rediriger vers l'arbre généalogique
-          router.push('/family-tree');
-        }, 2000);
-      }, 1500);
-    } catch (error) {
-      setMessage({ type: 'error', text: 'Une erreur est survenue lors de l\'ajout du membre' });
+        if (newMother) {
+          motherId = newMother.id.toString();
+        }
+      }
+      
+      if (addNewFather) {
+        // Ajouter le nouveau père
+        const newFather = FamilyTreeService.addSimulatedPerson({
+          firstName: newFatherData.firstName,
+          lastName: newFatherData.lastName,
+          gender: 'male',
+          birthDate: newFatherData.birthDate || undefined,
+          birthPlace: newFatherData.birthPlace || undefined
+        });
+        
+        if (newFather) {
+          fatherId = newFather.id.toString();
+        }
+      }
+      
+      // Vérifier si les parents sélectionnés ne sont pas frères et sœurs
+      if (fatherId && motherId) {
+        const fatherIdNum = parseInt(fatherId as string);
+        const motherIdNum = parseInt(motherId as string);
+        
+        if (!isNaN(fatherIdNum) && !isNaN(motherIdNum)) {
+          const areSiblings = FamilyTreeService.areSiblings(fatherIdNum, motherIdNum);
+          if (areSiblings) {
+            setMessage({ type: 'error', text: 'Les parents sélectionnés sont frères et sœurs. Veuillez choisir d\'autres parents.' });
+            setSubmitting(false);
+            return;
+          }
+        }
+      }
+      
+      // Préparer les données pour l'ajout
+      const personData = {
+        firstName: formData.firstName,
+        lastName: formData.lastName,
+        gender: formData.gender,
+        birthDate: formData.birthDate,
+        birthPlace: formData.birthPlace,
+        deathDate: formData.deathDate,
+        notes: formData.biography,
+        mother: motherId || undefined,
+        father: fatherId || undefined
+      };
+      
+      // Ajouter la personne aux données simulées
+      const newPerson = FamilyTreeService.addSimulatedPerson(personData);
+      
+      console.log('Nouveau membre ajouté:', newPerson);
+      
+      // Afficher un message de succès
+      setMessage({ type: 'success', text: 'Membre ajouté avec succès à l\'arbre généalogique!' });
+      setSubmitting(false);
+      
+      // Rediriger vers la page principale après 2 secondes
+      setTimeout(() => {
+        router.push('/family-tree');
+      }, 2000);
+    } catch (err: any) {
+      console.error('Erreur lors de l\'ajout du membre:', err);
+      
+      // Afficher le message d'erreur spécifique si disponible
+      const errorMessage = err.message || 'Une erreur est survenue lors de l\'ajout du membre';
+      setMessage({ type: 'error', text: errorMessage });
       setSubmitting(false);
     }
   };
@@ -174,7 +296,7 @@ export default function AddFamilyMember() {
                     name="firstName"
                     type="text"
                     value={formData.firstName}
-                    onChange={handleInputChange}
+                    onChange={handleChange}
                     className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
                     required
                   />
@@ -189,7 +311,7 @@ export default function AddFamilyMember() {
                     name="lastName"
                     type="text"
                     value={formData.lastName}
-                    onChange={handleInputChange}
+                    onChange={handleChange}
                     className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
                     required
                   />
@@ -203,7 +325,7 @@ export default function AddFamilyMember() {
                     id="gender"
                     name="gender"
                     value={formData.gender}
-                    onChange={handleInputChange}
+                    onChange={handleChange}
                     className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
                   >
                     <option value="male">Homme</option>
@@ -221,7 +343,7 @@ export default function AddFamilyMember() {
                     name="birthDate"
                     type="date"
                     value={formData.birthDate}
-                    onChange={handleInputChange}
+                    onChange={handleChange}
                     className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
                   />
                 </div>
@@ -235,7 +357,7 @@ export default function AddFamilyMember() {
                     name="birthPlace"
                     type="text"
                     value={formData.birthPlace}
-                    onChange={handleInputChange}
+                    onChange={handleChange}
                     className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
                   />
                 </div>
@@ -249,7 +371,7 @@ export default function AddFamilyMember() {
                     name="deathDate"
                     type="date"
                     value={formData.deathDate}
-                    onChange={handleInputChange}
+                    onChange={handleChange}
                     className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
                   />
                 </div>
@@ -259,41 +381,19 @@ export default function AddFamilyMember() {
               <div className="space-y-4">
                 <h3 className="text-xl font-semibold mb-2">Relations familiales</h3>
                 
-                <div>
-                  <label htmlFor="father" className="block text-sm font-medium text-gray-700 mb-1">
-                    Père
-                  </label>
-                  <select
-                    id="father"
-                    name="father"
-                    value={formData.father}
-                    onChange={handleInputChange}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-                  >
-                    <option value="">Sélectionner le père</option>
-                    {persons
-                      .filter(person => person.gender === 'male')
-                      .map(person => (
-                        <option key={person.id} value={person.id}>
-                          {person.firstName} {person.lastName}
-                        </option>
-                      ))
-                    }
-                  </select>
-                </div>
-                
-                <div>
-                  <label htmlFor="mother" className="block text-sm font-medium text-gray-700 mb-1">
+                <div className="mb-4">
+                  <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="mother">
                     Mère
                   </label>
                   <select
                     id="mother"
                     name="mother"
                     value={formData.mother}
-                    onChange={handleInputChange}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                    onChange={handleChange}
+                    className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
                   >
-                    <option value="">Sélectionner la mère</option>
+                    <option value="">Sélectionner une mère (optionnel)</option>
+                    <option value="new">➕ Ajouter une nouvelle mère</option>
                     {persons
                       .filter(person => person.gender === 'female')
                       .map(person => (
@@ -303,8 +403,156 @@ export default function AddFamilyMember() {
                       ))
                     }
                   </select>
+                  
+                  {addNewMother && (
+                    <div className="mt-4 p-4 border rounded bg-gray-50">
+                      <h3 className="font-bold mb-2 text-blue-600">Nouvelle mère</h3>
+                      <div className="grid grid-cols-2 gap-4">
+                        <div className="mb-2">
+                          <label className="block text-gray-700 text-sm font-bold mb-1" htmlFor="motherFirstName">
+                            Prénom *
+                          </label>
+                          <input
+                            type="text"
+                            id="motherFirstName"
+                            name="firstName"
+                            value={newMotherData.firstName}
+                            onChange={handleNewMotherChange}
+                            className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                            required
+                          />
+                        </div>
+                        <div className="mb-2">
+                          <label className="block text-gray-700 text-sm font-bold mb-1" htmlFor="motherLastName">
+                            Nom *
+                          </label>
+                          <input
+                            type="text"
+                            id="motherLastName"
+                            name="lastName"
+                            value={newMotherData.lastName}
+                            onChange={handleNewMotherChange}
+                            className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                            required
+                          />
+                        </div>
+                        <div className="mb-2">
+                          <label className="block text-gray-700 text-sm font-bold mb-1" htmlFor="motherBirthDate">
+                            Date de naissance
+                          </label>
+                          <input
+                            type="date"
+                            id="motherBirthDate"
+                            name="birthDate"
+                            value={newMotherData.birthDate}
+                            onChange={handleNewMotherChange}
+                            className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                          />
+                        </div>
+                        <div className="mb-2">
+                          <label className="block text-gray-700 text-sm font-bold mb-1" htmlFor="motherBirthPlace">
+                            Lieu de naissance
+                          </label>
+                          <input
+                            type="text"
+                            id="motherBirthPlace"
+                            name="birthPlace"
+                            value={newMotherData.birthPlace}
+                            onChange={handleNewMotherChange}
+                            className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  )}
                 </div>
-                
+
+                <div className="mb-4">
+                  <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="father">
+                    Père
+                  </label>
+                  <select
+                    id="father"
+                    name="father"
+                    value={formData.father}
+                    onChange={handleChange}
+                    className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                  >
+                    <option value="">Sélectionner un père (optionnel)</option>
+                    <option value="new">➕ Ajouter un nouveau père</option>
+                    {persons
+                      .filter(person => person.gender === 'male')
+                      .map(person => (
+                        <option key={person.id} value={person.id}>
+                          {person.firstName} {person.lastName}
+                        </option>
+                      ))
+                    }
+                  </select>
+                  
+                  {addNewFather && (
+                    <div className="mt-4 p-4 border rounded bg-gray-50">
+                      <h3 className="font-bold mb-2 text-blue-600">Nouveau père</h3>
+                      <div className="grid grid-cols-2 gap-4">
+                        <div className="mb-2">
+                          <label className="block text-gray-700 text-sm font-bold mb-1" htmlFor="fatherFirstName">
+                            Prénom *
+                          </label>
+                          <input
+                            type="text"
+                            id="fatherFirstName"
+                            name="firstName"
+                            value={newFatherData.firstName}
+                            onChange={handleNewFatherChange}
+                            className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                            required
+                          />
+                        </div>
+                        <div className="mb-2">
+                          <label className="block text-gray-700 text-sm font-bold mb-1" htmlFor="fatherLastName">
+                            Nom *
+                          </label>
+                          <input
+                            type="text"
+                            id="fatherLastName"
+                            name="lastName"
+                            value={newFatherData.lastName}
+                            onChange={handleNewFatherChange}
+                            className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                            required
+                          />
+                        </div>
+                        <div className="mb-2">
+                          <label className="block text-gray-700 text-sm font-bold mb-1" htmlFor="fatherBirthDate">
+                            Date de naissance
+                          </label>
+                          <input
+                            type="date"
+                            id="fatherBirthDate"
+                            name="birthDate"
+                            value={newFatherData.birthDate}
+                            onChange={handleNewFatherChange}
+                            className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                          />
+                        </div>
+                        <div className="mb-2">
+                          <label className="block text-gray-700 text-sm font-bold mb-1" htmlFor="fatherBirthPlace">
+                            Lieu de naissance
+                          </label>
+                          <input
+                            type="text"
+                            id="fatherBirthPlace"
+                            name="birthPlace"
+                            value={newFatherData.birthPlace}
+                            onChange={handleNewFatherChange}
+                            className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </div>
+
                 <div>
                   <label htmlFor="photo" className="block text-sm font-medium text-gray-700 mb-1">
                     Photo
@@ -326,9 +574,9 @@ export default function AddFamilyMember() {
                   <textarea
                     id="biography"
                     name="biography"
-                    rows={5}
                     value={formData.biography}
-                    onChange={handleInputChange}
+                    onChange={handleChange}
+                    rows={4}
                     className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
                   />
                 </div>
@@ -374,14 +622,4 @@ export default function AddFamilyMember() {
   );
 }
 
-// Données d'exemple pour simuler une liste de personnes
-const samplePersons = [
-  { id: 1, firstName: 'Jean', lastName: 'Dupont', gender: 'male', birthDate: '1950-05-15' },
-  { id: 2, firstName: 'Marie', lastName: 'Dupont', gender: 'female', birthDate: '1952-08-22' },
-  { id: 3, firstName: 'Pierre', lastName: 'Dupont', gender: 'male', birthDate: '1975-03-10' },
-  { id: 4, firstName: 'Sophie', lastName: 'Dupont', gender: 'female', birthDate: '1978-11-05' },
-  { id: 5, firstName: 'Luc', lastName: 'Dupont', gender: 'male', birthDate: '1980-07-30' },
-  { id: 6, firstName: 'Emma', lastName: 'Martin', gender: 'female', birthDate: '1979-04-18' },
-  { id: 7, firstName: 'Thomas', lastName: 'Dupont', gender: 'male', birthDate: '2005-12-03' },
-  { id: 8, firstName: 'Léa', lastName: 'Dupont', gender: 'female', birthDate: '2008-09-21' },
-];
+
