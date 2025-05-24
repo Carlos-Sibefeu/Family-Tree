@@ -108,9 +108,9 @@ const PersonNode = ({ data, selected }: NodeProps<Person>) => {
             }}
             aria-label={`${data.firstName} ${data.lastName}`}
           />
-        )}
+        )} 
         
-        {/* Informations de la personne */}
+        {/* Informations de la personne */} 
         <div
           style={{
             ...style,
