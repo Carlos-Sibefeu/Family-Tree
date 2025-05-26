@@ -6,7 +6,10 @@
     "dev": "next dev --turbopack",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "test": "jest",
+    "format": "prettier --write .",
+    "analyze": "cross-env ANALYZE=true next build"
   },
   "dependencies": {
     "@balkangraph/familytree.js": "^1.9.45",
