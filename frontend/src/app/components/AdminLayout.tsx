@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import AdminSidebar from './sidebar/AdminSidebar';
-
+// panel admin
 interface AdminLayoutProps {
   children: React.ReactNode;
 }
