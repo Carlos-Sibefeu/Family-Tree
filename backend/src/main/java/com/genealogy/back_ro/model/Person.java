@@ -7,32 +7,66 @@ import jakarta.validation.constraints.Size;
 import java.time.LocalDate;
 import java.util.*;
 
+/**
+ * Entité représentant une personne dans l'arbre généalogique.
+ * Cette classe modélise les informations personnelles et les relations familiales
+ * pour permettre l'application des algorithmes de graphe dans l'analyse des liens de parenté.
+ *
+ * @author Équipe Family-Tree
+ * @version 1.0
+ */
 @Entity
 @Table(name = "persons")
 public class Person {
+    /**
+     * Identifiant unique de la personne
+     */
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    /**
+     * Prénom de la personne
+     * Ne peut pas être vide et limité à 100 caractères
+     */
     @NotBlank
     @Size(max = 100)
     private String firstName;
 
+    /**
+     * Nom de famille de la personne
+     * Ne peut pas être vide et limité à 100 caractères
+     */
     @NotBlank
     @Size(max = 100)
     private String lastName;
 
+    /**
+     * Date de naissance de la personne
+     */
     private LocalDate birthDate;
 
+    /**
+     * Date de décès de la personne (null si vivante)
+     */
     private LocalDate deathDate;
 
+    /**
+     * Lieu de naissance de la personne
+     */
     @Size(max = 255)
     private String birthPlace;
 
+    /**
+     * Photo de la personne stockée sous forme de tableau d'octets
+     */
     @Lob
     @Column(columnDefinition = "BLOB")
     private byte[] photo;
 
+    /**
+     * Biographie ou notes sur la personne
+     */
     @Size(max = 1000)
     private String biography;
 
@@ -176,22 +210,45 @@ public class Person {
         this.createdBy = createdBy;
     }
 
-    // Méthodes utilitaires pour ajouter/supprimer des relations
+    /**
+     * Méthodes utilitaires pour gérer les relations familiales
+     */
+    
+    /**
+     * Ajoute un parent à cette personne et met à jour la relation bidirectionnelle
+     * 
+     * @param parent La personne à ajouter comme parent
+     */
     public void addParent(Person parent) {
         this.parents.add(parent);
         parent.getChildren().add(this);
     }
 
+    /**
+     * Supprime un parent de cette personne et met à jour la relation bidirectionnelle
+     * 
+     * @param parent La personne à retirer des parents
+     */
     public void removeParent(Person parent) {
         this.parents.remove(parent);
         parent.getChildren().remove(this);
     }
 
+    /**
+     * Ajoute un enfant à cette personne et met à jour la relation bidirectionnelle
+     * 
+     * @param child La personne à ajouter comme enfant
+     */
     public void addChild(Person child) {
         this.children.add(child);
         child.getParents().add(this);
     }
 
+    /**
+     * Supprime un enfant de cette personne et met à jour la relation bidirectionnelle
+     * 
+     * @param child La personne à retirer des enfants
+     */
     public void removeChild(Person child) {
         this.children.remove(child);
         child.getParents().remove(this);
