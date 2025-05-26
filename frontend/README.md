@@ -1,6 +1,9 @@
 # Arbre Généalogique - Frontend (Next.js)
 
-Ce projet est le frontend de l'application d'arbre généalogique développée dans le cadre d'un TP de Recherche Opérationnelle. Il permet de visualiser et manipuler un arbre généalogique familial en utilisant des algorithmes de graphes.
+Ce projet est le frontend de l'application d'arbre généalogique développée dans le cadre d'un TP de Recherche Opérationnelle. Il permet de visualiser et manipuler un arbre généalogique familial en utilisant des algorithmes de graphes avancés pour l'analyse des relations familiales.
+
+![Version](https://img.shields.io/badge/version-1.0.0-blue.svg)
+![License](https://img.shields.io/badge/license-MIT-green.svg)
 
 ## Fonctionnalités
 
