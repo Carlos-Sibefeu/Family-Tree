@@ -57,9 +57,9 @@ L'arbre généalogique est bien plus qu’un simple outil de visualisation des l
 
 ### Installation
 
-```bash
+
 # Cloner le dépôt
-git clone https://github.com/ton-utilisateur/arbre-genealogique-nestjs.git
+git clone https://github.com/Carlos-Sibefeu/Family-Tree.git
 cd arbre-genealogique-nestjs
 
 # Installer les dépendances
