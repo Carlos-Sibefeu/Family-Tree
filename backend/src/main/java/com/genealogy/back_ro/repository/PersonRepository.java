@@ -10,7 +10,7 @@ import java.util.List;
 
 @Repository
 public interface PersonRepository extends JpaRepository<Person, Long> {
-    @Query("SELECT p FROM Person p JOIN p.parents parent WHERE parent.id = :parentId")
+    @Query("SELECT pe FROM Person pe JOIN pe.parents parent WHERE parent.id = :parentId")
     List<Person> findChildrenByParentId(@Param("parentId") Long parentId);
 
     @Query("SELECT p FROM Person p JOIN p.children child WHERE child.id = :childId")
