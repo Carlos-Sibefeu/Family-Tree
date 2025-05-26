@@ -1,3 +1,4 @@
+//ressource personne
 // Modèle pour une personne dans l'arbre généalogique
 export interface Person {
   id: number;
