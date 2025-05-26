@@ -8,7 +8,8 @@ Ce projet est le frontend de l'application d'arbre généalogique développée d
 - Recherche de liens de parenté entre membres (Dijkstra)
 - Analyse de la structure familiale (Prim, Kruskal)
 - Gestion des utilisateurs et des droits d'accès
-- Interface responsive et intuitive
+- Interfaces responsives et intuitives
+
 
 ## Technologies utilisées
 
